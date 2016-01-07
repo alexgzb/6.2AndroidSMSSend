@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         pasteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                smsBodyEditText.setText(smsBodyEditText.getText().toString() + myClipboard.getPrimaryClip().getItemAt(0).getText());
+                smsBodyEditText.append(myClipboard.getPrimaryClip().getItemAt(0).getText());
             }
         });
 
