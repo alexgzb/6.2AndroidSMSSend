@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "com.gezelbom.androidsms62"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
