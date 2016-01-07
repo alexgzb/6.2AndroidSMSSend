@@ -8,16 +8,16 @@
     tools:context="com.gezelbom.androidsms62.MainActivity">
 
     <!--<android.support.design.widget.AppBarLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:theme="@style/AppTheme.AppBarOverlay">-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:theme="@style/AppTheme.AppBarOverlay">-->
 
-        <!--<android.support.v7.widget.Toolbar-->
-            <!--android:id="@+id/toolbar"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="?attr/actionBarSize"-->
-            <!--android:background="?attr/colorPrimary"-->
-            <!--app:popupTheme="@style/AppTheme.PopupOverlay" />-->
+    <!--<android.support.v7.widget.Toolbar-->
+    <!--android:id="@+id/toolbar"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="?attr/actionBarSize"-->
+    <!--android:background="?attr/colorPrimary"-->
+    <!--app:popupTheme="@style/AppTheme.PopupOverlay" />-->
 
     <!--</android.support.design.widget.AppBarLayout>-->
 
@@ -25,32 +25,73 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:id="@+id/linearLayout_TopBar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/linearLayout_TopBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/editText_number"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:hint="Phone number"
+                android:inputType="phone"
+                android:singleLine="true"
+                android:textIsSelectable="true" />
+
+            <Button
+                android:id="@+id/buttonPick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pick" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/linearLayout_TopBar"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonClear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Clear" />
+
+
+            <Button
+                android:id="@+id/buttonCopy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Copy" />
+
+
+            <Button
+                android:id="@+id/buttonPaste"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Paste" />
+
+
+        </LinearLayout>
 
         <EditText
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:inputType="phone"
-            android:id="@+id/editText_number"
-            android:layout_weight="1"
-            android:textIsSelectable="true"
-            android:singleLine="true"
-            android:hint="Phone number"
-            android:gravity="center" />
-    </LinearLayout>
-
-        <EditText
+            android:id="@+id/editText_body"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Enter message"
-            android:layout_below="@id/linearLayout_TopBar"
-            android:id="@+id/editText_body"
-            android:gravity="start" />
+            android:layout_below="@id/linearLayout_buttons"
+            android:gravity="start"
+            android:hint="Enter message" />
 
     </RelativeLayout>
 

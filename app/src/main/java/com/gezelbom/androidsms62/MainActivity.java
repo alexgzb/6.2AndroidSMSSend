@@ -1,21 +1,27 @@
 package com.gezelbom.androidsms62;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 
 /**
  * Simple APP to send and receive SMS.
- * The send SMS functionality has copy/paste functionality as well as possibillity to get number
+ * The send SMS functionality has copy/paste functionality as well as possibility to get number
  * from contacts.
  * Displays a notification with flashing led lights and vibration when a SMS has been received
  */
@@ -23,7 +29,12 @@ public class MainActivity extends AppCompatActivity {
 
     EditText phoneNumberEditText;
     EditText smsBodyEditText;
+    Button pickButton;
+    Button clearButton;
+    Button copyButton;
+    Button pasteButton;
     ClipboardManager myClipboard;
+    public final int PICK_CONTACT = 8888;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +43,53 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /**
+         * Clearbutton setup
+         */
+        clearButton = (Button) findViewById(R.id.buttonClear);
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                smsBodyEditText.setText("");
+            }
+        });
+
+        /**
+         * CopyButton setup
+         */
+        copyButton = (Button) findViewById(R.id.buttonCopy);
+        copyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipData clipData = ClipData.newPlainText("Text", smsBodyEditText.getText());
+                myClipboard.setPrimaryClip(clipData);
+            }
+        });
+
+
+        /**
+         * PasteButton setup
+         */
+        pasteButton = (Button) findViewById(R.id.buttonPaste);
+        pasteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                smsBodyEditText.setText(smsBodyEditText.getText().toString() + myClipboard.getPrimaryClip().getItemAt(0).getText());
+            }
+        });
+
+        /**
+         * PickButton Setup starts a contact picker dialog
+         */
+        pickButton = (Button) findViewById(R.id.buttonPick);
+        pickButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                startActivityForResult(i, PICK_CONTACT);
+            }
+        });
 
         //EditText widgets for the number and the smsbody
         phoneNumberEditText = (EditText) findViewById(R.id.editText_number);
@@ -57,6 +115,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Method to react on Activity Result If the result is from Contactpicker, get the number from the
+     * chosen contact
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_CONTACT && resultCode == RESULT_OK) {
+            Uri contactUri = data.getData();
+            Cursor cursor = getContentResolver().query(contactUri, null, null, null, null);
+            cursor.moveToFirst();
+            int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
+            phoneNumberEditText.setText(cursor.getString(column));
+        }
+    }
+
+    /**
      * OnClick Listener that creates a Alert Dialog, if the user Clicks on Yes, the sms is sent, otherwise not
      */
     View.OnClickListener dialogBoxclickListener = new View.OnClickListener() {
@@ -71,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                     .setCancelable(false)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
+                            // Send an SMS using SmsManager
                             SmsManager.getDefault().sendTextMessage(phoneNumberEditText.getText().toString(), null, smsBodyEditText.getText().toString(), null, null);
                             phoneNumberEditText.setText("");
                             smsBodyEditText.setText("");
@@ -79,8 +155,7 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            // if this button is clicked, just close
-                            // the dialog box and do nothing
+                            // Close the dialog
                             dialog.cancel();
                         }
                     })
