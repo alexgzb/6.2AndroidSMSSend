@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,11 +20,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.Locale;
+
 
 /**
  * Simple APP to send and receive SMS.
- * The send SMS functionality has copy/paste functionality as well as possibility to get number
- * from contacts.
+ * The send SMS functionality has copy/paste functionality as well as possibility to get number from contacts.
+ * Possibility to speak the text from the body TextToSpeech has been implemented
  * Displays a notification with flashing led lights and vibration when a SMS has been received
  */
 public class MainActivity extends AppCompatActivity {
@@ -30,9 +34,11 @@ public class MainActivity extends AppCompatActivity {
     EditText phoneNumberEditText;
     EditText smsBodyEditText;
     Button pickButton;
+    Button speakButton;
     Button clearButton;
     Button copyButton;
     Button pasteButton;
+    TextToSpeech textToSpeech;
     ClipboardManager myClipboard;
     public final int PICK_CONTACT = 8888;
 
@@ -41,7 +47,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Get the ClipboardManager from the system
         myClipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+
+        // Creating a new instans of texttoSpeech Class and setting language to English
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    textToSpeech.setLanguage(Locale.ENGLISH);
+                }
+            }
+        });
+
+        //SpeakButton setup
+        speakButton = (Button) findViewById(R.id.buttonSpeak);
+        speakButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Use the textToSpeech object to speak the text from the body
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    textToSpeech.speak(smsBodyEditText.getText().toString(), TextToSpeech.QUEUE_ADD, null, "SMS-SPEAK");
+                } else {
+                    textToSpeech.speak(smsBodyEditText.getText().toString(), TextToSpeech.QUEUE_ADD, null);
+                }
+            }
+        });
 
         //ClearButton setup
         clearButton = (Button) findViewById(R.id.buttonClear);
