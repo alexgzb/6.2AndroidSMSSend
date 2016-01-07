@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,11 +20,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.Locale;
+
 
 /**
  * Simple APP to send and receive SMS.
- * The send SMS functionality has copy/paste functionality as well as possibility to get number
- * from contacts.
+ * The send SMS functionality has copy/paste functionality as well as possibility to get number from contacts.
+ * Possibility to speak the text from the body TextToSpeech has been implemented
  * Displays a notification with flashing led lights and vibration when a SMS has been received
  */
 public class MainActivity extends AppCompatActivity {
@@ -30,9 +34,11 @@ public class MainActivity extends AppCompatActivity {
     EditText phoneNumberEditText;
     EditText smsBodyEditText;
     Button pickButton;
+    Button speakButton;
     Button clearButton;
     Button copyButton;
     Button pasteButton;
+    TextToSpeech textToSpeech;
     ClipboardManager myClipboard;
     public final int PICK_CONTACT = 8888;
 
@@ -41,7 +47,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Get the ClipboardManager from the system
         myClipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+
+        //SpeakButton setup
+        speakButton = (Button) findViewById(R.id.buttonSpeak);
+        speakButton.setOnClickListener(new View.OnClickListener() {
+            @SuppressWarnings("deprecation")
+            @Override
+            public void onClick(View v) {
+                // Use the textToSpeech object to speak the text from the body
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    textToSpeech.speak(smsBodyEditText.getText().toString(), TextToSpeech.QUEUE_ADD, null, "SMS-SPEAK");
+                } else {
+                    textToSpeech.speak(smsBodyEditText.getText().toString(), TextToSpeech.QUEUE_ADD, null);
+                }
+            }
+        });
 
         //ClearButton setup
         clearButton = (Button) findViewById(R.id.buttonClear);
@@ -82,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //EditText widgets for the number and the smsbody
+        //EditText widgets for the number and the smsBody
         phoneNumberEditText = (EditText) findViewById(R.id.editText_number);
         phoneNumberEditText.setText("");
         smsBodyEditText = (EditText) findViewById(R.id.editText_body);
@@ -99,13 +121,33 @@ public class MainActivity extends AppCompatActivity {
              */
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "To confirm".toUpperCase(), Snackbar.LENGTH_LONG).setAction("Click here", dialogBoxclickListener).show();
+                Snackbar.make(view, "To confirm".toUpperCase(), Snackbar.LENGTH_LONG).setAction("Click here", dialogBoxClickListener).show();
             }
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Creating a new instance of textToSpeech Class and setting language to English
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    textToSpeech.setLanguage(Locale.ENGLISH);
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        textToSpeech.shutdown();
+    }
+
     /**
-     * Method to react on Activity Result If the result is from Contactpicker, get the number from the
+     * Method to react on Activity Result If the result is from ContactPicker, get the number from the
      * chosen contact
      */
     @Override
@@ -115,17 +157,19 @@ public class MainActivity extends AppCompatActivity {
 
             Uri contactUri = data.getData();
             Cursor cursor = getContentResolver().query(contactUri, null, null, null, null);
-            cursor.moveToFirst();
-            int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-
-            phoneNumberEditText.setText(cursor.getString(column));
+            if (cursor != null) {
+                cursor.moveToFirst();
+                int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                phoneNumberEditText.setText(cursor.getString(column));
+                cursor.close();
+            }
         }
     }
 
     /**
      * OnClick Listener that creates a Alert Dialog, if the user Clicks on Yes, the sms is sent, otherwise not
      */
-    View.OnClickListener dialogBoxclickListener = new View.OnClickListener() {
+    View.OnClickListener dialogBoxClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
 
